@@ -104,18 +104,23 @@ namespace RotatingHitbox
 
                 if (hitbox.Contains((int)Math.Round(unrotatedPointCoords.X), (int)Math.Round(unrotatedPointCoords.Y)))
                 {
+                    Vector2 tempVelocity = velocity;
+                    velocity = bouncingRect.velocity;
+                    bouncingRect.velocity = tempVelocity;
+                    rotationSpeed *= -1;
+                    bouncingRect.rotationSpeed *= -1;
                     currentCollision = true;
                     break;
                 }
             }
-            if (!colliding && currentCollision)
-            {
-                Vector2 tempVelocity = velocity;
-                velocity = bouncingRect.velocity;
-                bouncingRect.velocity = tempVelocity;
-                rotationSpeed *= -1;
-                bouncingRect.rotationSpeed *= -1;
-            }
+            //if (!colliding && currentCollision)
+            //{
+            //    Vector2 tempVelocity = velocity;
+            //    velocity = bouncingRect.velocity;
+            //    bouncingRect.velocity = tempVelocity;
+            //    rotationSpeed *= -1;
+            //    bouncingRect.rotationSpeed *= -1;
+            //}
             colliding = currentCollision;
         }
 
