@@ -14,6 +14,8 @@ namespace RotatingHitbox
         float rotationSpeed;
         Vector2 velocity;
         Vector2[] cornerPoints;
+        Matrix rotationMatrix;
+        bool colliding;
 
         public BouncingRectangle(Texture2D texture, Vector2 position, Color color, Vector2 scale, Rectangle bounceBounds, float rotationSpeed, Vector2 velocity)
             : base(texture, position, color)
@@ -28,6 +30,7 @@ namespace RotatingHitbox
             cornerPoints[1] = new Vector2(-Width / 2f, Height / 2f);
             cornerPoints[2] = new Vector2(Width / 2f, Height / 2f);
             cornerPoints[3] = new Vector2(Width / 2f, -Height / 2f);
+            colliding = false;
         }
 
         public void Update(GameTime gameTime)
@@ -35,18 +38,27 @@ namespace RotatingHitbox
             Rotation += rotationSpeed;
             position += velocity;
 
-           
 
-            foreach(Vector2 point in GetRotatedCorners())
+
+            foreach (Vector2 point in GetRotatedCorners())
             {
-                if (point.X < 0 || point.X > bounceBounds.Width)
+                if (point.X < 0)
                 {
-                    velocity.X *= -1;
+                    velocity.X = Math.Abs(velocity.X);
                     rotationSpeed *= -1;
                 }
-                if (point.Y  < 0 || point.Y > bounceBounds.Height)
+                if(point.X > bounceBounds.Width)
                 {
-                    velocity.Y *= -1;
+                    velocity.X = -Math.Abs(velocity.X);
+                    rotationSpeed *= -1;
+                }
+                if (point.Y < 0)
+                {
+                    velocity.Y = Math.Abs(velocity.Y);
+                }
+                if(point.Y > bounceBounds.Height)
+                {
+                    velocity.Y = -Math.Abs(velocity.Y);
                 }
             }
 
@@ -62,7 +74,7 @@ namespace RotatingHitbox
 
         public Vector2[] GetRotatedCorners()
         {
-            Matrix rotationMatrix = Matrix.CreateRotationZ(Rotation);
+            rotationMatrix = Matrix.CreateRotationZ(Rotation);
 
             Vector2[] rotatedCornerPoints = new Vector2[4];
 
@@ -81,10 +93,30 @@ namespace RotatingHitbox
 
         public void CollideWithRectangle(BouncingRectangle bouncingRect)
         {
-            foreach(Vector2 point in GetRotatedCorners())
+            bool currentCollision = false;
+            foreach (Vector2 point in bouncingRect.GetRotatedCorners())
             {
-                for(int i = 0; i )
+                Vector2 adjustedPointCoords = point - position;
+
+                Vector2 unrotatedPointCoords = Vector2.Transform(adjustedPointCoords, Matrix.Invert(rotationMatrix));
+
+                Rectangle hitbox = new Rectangle(-Width / 2, -Height / 2, Width, Height);
+
+                if (hitbox.Contains((int)Math.Round(unrotatedPointCoords.X), (int)Math.Round(unrotatedPointCoords.Y)))
+                {
+                    currentCollision = true;
+                    break;
+                }
             }
+            if (!colliding && currentCollision)
+            {
+                Vector2 tempVelocity = velocity;
+                velocity = bouncingRect.velocity;
+                bouncingRect.velocity = tempVelocity;
+                rotationSpeed *= -1;
+                bouncingRect.rotationSpeed *= -1;
+            }
+            colliding = currentCollision;
         }
 
     }
