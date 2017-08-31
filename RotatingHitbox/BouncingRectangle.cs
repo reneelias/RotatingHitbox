@@ -91,6 +91,24 @@ namespace RotatingHitbox
             return rotatedCornerPoints;
         }
 
+        public bool CheckCollisionWithRectangle(BouncingRectangle bouncingRect)
+        {
+            foreach (Vector2 point in bouncingRect.GetRotatedCorners())
+            {
+                Vector2 adjustedPointCoords = point - position;
+
+                Vector2 unrotatedPointCoords = Vector2.Transform(adjustedPointCoords, Matrix.Invert(rotationMatrix));
+
+                Rectangle hitbox = new Rectangle(-Width / 2, -Height / 2, Width, Height);
+
+                if (hitbox.Contains((int)Math.Round(unrotatedPointCoords.X), (int)Math.Round(unrotatedPointCoords.Y)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void CollideWithRectangle(BouncingRectangle bouncingRect)
         {
             bool currentCollision = false;

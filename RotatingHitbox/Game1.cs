@@ -39,7 +39,21 @@ namespace RotatingHitbox
             for(int i = 0; i < 15; i++)
             {
                 int size = random.Next(20, 100);
-                bouncingRects.Add(new BouncingRectangle(Content.Load<Texture2D>("WhitePixel"), new Vector2(random.Next(75, GraphicsDevice.Viewport.Width - 75), random.Next(75, GraphicsDevice.Viewport.Height - 75)), new Color(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)), new Vector2(size, size), new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), .025f, new Vector2(random.Next(3, 6), random.Next(3, 6))));
+                BouncingRectangle tempBouncingRect;
+                bool contained = false;
+                do
+                {
+                    tempBouncingRect = new BouncingRectangle(Content.Load<Texture2D>("WhitePixel"), new Vector2(random.Next(75, GraphicsDevice.Viewport.Width - 75), random.Next(75, GraphicsDevice.Viewport.Height - 75)), new Color(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)), new Vector2(size, size), new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), .025f, new Vector2(random.Next(3, 6), random.Next(3, 6)));
+                    foreach (BouncingRectangle bouncingRect in bouncingRects)
+                    { 
+                        if (bouncingRect.CheckCollisionWithRectangle(tempBouncingRect))
+                        {
+                            contained = true;
+                        }
+                    }
+                    
+                } while (contained);
+                bouncingRects.Add(tempBouncingRect);
             }
         }
 
